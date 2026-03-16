@@ -230,12 +230,24 @@ pauseBtn.addEventListener("click", togglePause);
 resumeBtn.addEventListener("click", togglePause);
 
 // Exportar a Google Sheets
+let yaEnviadoEstaPartida = false;
 document.getElementById('export-stats-btn').addEventListener('click', () => {
-  const btn=this;
+  const btn = this;
 
+  // Protección 1: ya enviado en esta partida
+  if (yaEnviadoEstaPartida) {
+    alert("¡Ya enviaste los resultados de esta partida! 🍕");
+    return;
+  }
+
+  // Protección 2: evita clics múltiples rápidos
+  if (btn.disabled) return;
+
+  // Deshabilitar inmediatamente
   btn.disabled = true;
   btn.textContent = "Enviando...";
   btn.style.background = "#888";
+  btn.style.cursor = "not-allowed";
 
   const name = playerNameInput.value.trim() || "Anónimo";
   const age  = playerAgeInput.value.trim() || "-";
@@ -244,7 +256,7 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
   playerInfo.age  = age;
   localStorage.setItem('pizzatronPlayerInfo', JSON.stringify(playerInfo));
 
-  // Cálculos finales
+  // Tus cálculos (perfectos)
   const duracionPartida = Math.round((Date.now() - startTime) / 1000);
 
   const precision = pizzasIntentadas > 0
@@ -255,7 +267,6 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
     ? Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length)
     : 0;
 
-  // Datos completos
   const datos = {
     nombre:               name,
     edad:                 age,
@@ -295,10 +306,18 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
   })
   .then(() => {
     alert("¡Datos enviados! Gracias por jugar, " + name + " 🍕");
+    btn.textContent = "Enviado ✓";
+    btn.style.background = "#66bb6a";
+    yaEnviadoEstaPartida = true;  // bloquea futuros envíos
   })
   .catch(err => {
     console.error("Error al enviar:", err);
-    alert("No se pudo enviar. Revisa conexión o URL del script.");
+    alert("No se pudo enviar. Intenta de nuevo.");
+    // Rehabilitar solo si falla
+    btn.disabled = false;
+    btn.textContent = "Reintentar envío";
+    btn.style.background = "#ff4d6d";
+    yaEnviadoEstaPartida = false;
   });
 });
 
