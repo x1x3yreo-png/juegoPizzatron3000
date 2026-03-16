@@ -205,6 +205,12 @@ document.querySelectorAll(".ing-button").forEach(btn => {
 
 // Pausa / Reanudar
 function togglePause() {
+  if (!isReady) {
+    console.log("El juego aún no ha comenzado. Presiona ¡LISTO! o Espacio primero.");
+    // Opcional: mostrar un mensaje temporal en pantalla
+    // alert("¡Presiona 'LISTO!' o Espacio para comenzar!");
+    return;
+  }
   isPaused = !isPaused;
   if (isPaused) {
     pauseOverlay.style.display = "flex";
@@ -315,7 +321,8 @@ function startGame() {
   level = 1;
   pizzasCorrectas = 0;
   currentSpeed = baseSpeed;
-  isPaused = false;
+  isPaused = true;           // ¡Pausado desde el inicio!
+  isReady = false;
 
   heartsEl.textContent = "♥♥♥";
   levelEl.textContent = "1";
@@ -323,11 +330,15 @@ function startGame() {
 
   resetPizza();
   showNewOrder();
+
   gameOver.style.display = "none";
   pauseOverlay.style.display = "none";
   pauseBtn.textContent = "Pausa";
 
+  // Mostrar botón "¡LISTO!"
   document.getElementById("ready-btn").style.display = "block";
+
+  // NO llamamos gameLoop() aquí
 }
 const readyBtn = document.getElementById("ready-btn");
 
@@ -336,7 +347,8 @@ function startGameplay() {
   if (!isReady) {
     isReady = true;
     isPaused = false;
-    readyBtn.style.display = "none";
+    //readyBtn.style.display = "none";
+    document.getElementById("ready-btn").style.display = "none";
     gameLoop();  // ahora sí empieza el movimiento
   }
 }
@@ -357,7 +369,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 // Iniciar
-startGame();
+//startGame();
 
 // Pantalla de bienvenida e instrucciones
 // Pantalla de instrucciones (no reinicia el juego)
@@ -413,3 +425,5 @@ function hideInstructions() {
   closeInstructionsBtn.style.display = "none";
   if (isPaused) togglePause();              // reanuda si estaba pausado por instrucciones
 }
+
+startGame();
