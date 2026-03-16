@@ -230,12 +230,23 @@ pauseBtn.addEventListener("click", togglePause);
 resumeBtn.addEventListener("click", togglePause);
 
 // Exportar a Google Sheets
-document.getElementById('export-stats-btn').addEventListener('click', () => {
-  const btn=this;
+let yaEnviado = false;
+let yaEnviado = false;  // bandera global (solo una vez por carga/página)
 
+document.getElementById('export-stats-btn').addEventListener('click', function() {
+  const btn = this;
+
+  // Protección extra: si ya se envió o está deshabilitado, salir
+  if (yaEnviado || btn.disabled) {
+    alert("¡Ya enviaste los resultados de esta partida!");
+    return;
+  }
+
+  // Deshabilitar inmediatamente
   btn.disabled = true;
   btn.textContent = "Enviando...";
   btn.style.background = "#888";
+  btn.style.cursor = "not-allowed";
 
   const name = playerNameInput.value.trim() || "Anónimo";
   const age  = playerAgeInput.value.trim() || "-";
@@ -244,7 +255,7 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
   playerInfo.age  = age;
   localStorage.setItem('pizzatronPlayerInfo', JSON.stringify(playerInfo));
 
-  // Cálculos finales
+  // Tus cálculos (están perfectos)
   const duracionPartida = Math.round((Date.now() - startTime) / 1000);
 
   const precision = pizzasIntentadas > 0
@@ -255,7 +266,6 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
     ? Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length)
     : 0;
 
-  // Datos completos
   const datos = {
     nombre:               name,
     edad:                 age,
@@ -295,10 +305,18 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
   })
   .then(() => {
     alert("¡Datos enviados! Gracias por jugar, " + name + " 🍕");
+    btn.textContent = "Enviado ✓";
+    btn.style.background = "#66bb6a";  // verde éxito
+    yaEnviado = true;  // bloquea futuros envíos en esta partida
   })
   .catch(err => {
     console.error("Error al enviar:", err);
-    alert("No se pudo enviar. Revisa conexión o URL del script.");
+    alert("No se pudo enviar. Intenta de nuevo.");
+    // Rehabilitar si falla (para permitir reintento)
+    btn.disabled = false;
+    btn.textContent = "Reintentar envío";
+    btn.style.background = "#ff4d6d";  // rojo error
+    yaEnviado = false;
   });
 });
 
