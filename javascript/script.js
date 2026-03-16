@@ -338,3 +338,35 @@ document.addEventListener('keydown', (event) => {
 });
 // Iniciar
 startGame();
+
+// Pantalla de bienvenida e instrucciones
+const welcomeOverlay = document.getElementById("welcome-overlay");
+const startGameBtn = document.getElementById("start-game-btn");
+const howToPlayBtn = document.getElementById("how-to-play-btn");
+
+// Mostrar instrucciones al inicio
+welcomeOverlay.style.display = "flex";
+howToPlayBtn.style.display = "none"; // oculto al inicio
+
+// Botón "Jugar" inicia el juego
+startGameBtn.addEventListener("click", () => {
+  welcomeOverlay.style.display = "none";
+  howToPlayBtn.style.display = "block"; // ahora sí visible
+  startGame(); // tu función que inicia el juego
+});
+
+// Botón "Cómo jugar" durante la partida
+howToPlayBtn.addEventListener("click", () => {
+  welcomeOverlay.style.display = "flex";
+  // Opcional: pausar el juego mientras se ven las instrucciones
+  if (!isPaused) togglePause();
+});
+
+// Tecla H (o I) también abre instrucciones
+document.addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() === 'h' || event.key.toLowerCase() === 'i') {
+    event.preventDefault();
+    welcomeOverlay.style.display = "flex";
+    if (!isPaused) togglePause();
+  }
+});
