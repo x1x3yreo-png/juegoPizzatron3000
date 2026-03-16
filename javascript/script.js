@@ -340,33 +340,56 @@ document.addEventListener('keydown', (event) => {
 startGame();
 
 // Pantalla de bienvenida e instrucciones
+// Pantalla de instrucciones (no reinicia el juego)
 const welcomeOverlay = document.getElementById("welcome-overlay");
 const startGameBtn = document.getElementById("start-game-btn");
 const howToPlayBtn = document.getElementById("how-to-play-btn");
+const closeInstructionsBtn = document.getElementById("close-instructions");
 
-// Mostrar instrucciones al inicio
+// Al inicio: mostrar instrucciones y esperar a "Jugar"
 welcomeOverlay.style.display = "flex";
-howToPlayBtn.style.display = "none"; // oculto al inicio
+howToPlayBtn.style.display = "none"; // oculto hasta que empiece el juego
 
-// Botón "Jugar" inicia el juego
+// Botón "¡JUGAR!" solo inicia la primera vez
 startGameBtn.addEventListener("click", () => {
   welcomeOverlay.style.display = "none";
-  howToPlayBtn.style.display = "block"; // ahora sí visible
-  startGame(); // tu función que inicia el juego
-});
-
-// Botón "Cómo jugar" durante la partida
-howToPlayBtn.addEventListener("click", () => {
-  welcomeOverlay.style.display = "flex";
-  // Opcional: pausar el juego mientras se ven las instrucciones
-  if (!isPaused) togglePause();
-});
-
-// Tecla H (o I) también abre instrucciones
-document.addEventListener('keydown', (event) => {
-  if (event.key.toLowerCase() === 'h' || event.key.toLowerCase() === 'i') {
-    event.preventDefault();
-    welcomeOverlay.style.display = "flex";
-    if (!isPaused) togglePause();
+  howToPlayBtn.style.display = "block"; // ahora visible
+  if (!currentPizza) {  // solo inicia si aún no empezó
+    startGame();
   }
 });
+
+// Botón "Cómo jugar" y tecla H durante el juego
+howToPlayBtn.addEventListener("click", showInstructions);
+document.addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() === 'h') {
+    event.preventDefault();
+    showInstructions();
+  }
+  // ESC siempre pausa/reanuda (ya lo tienes)
+  if (event.key === 'Escape' || event.keyCode === 27) {
+    event.preventDefault();
+    togglePause();
+  }
+});
+
+// Botón de cerrar instrucciones
+if (closeInstructionsBtn) {
+  closeInstructionsBtn.addEventListener("click", hideInstructions);
+}
+
+// Función para mostrar instrucciones sin reiniciar
+function showInstructions() {
+  welcomeOverlay.style.display = "flex";
+  startGameBtn.style.display = "none";      // oculta "Jugar" cuando ya empezó
+  closeInstructionsBtn.style.display = "block"; // muestra × para cerrar
+  if (!isPaused) togglePause();             // pausa si no está pausado
+}
+
+// Función para ocultar instrucciones
+function hideInstructions() {
+  welcomeOverlay.style.display = "none";
+  startGameBtn.style.display = "block";     // vuelve a mostrar por si acaso
+  closeInstructionsBtn.style.display = "none";
+  if (isPaused) togglePause();              // reanuda si estaba pausado por instrucciones
+}
