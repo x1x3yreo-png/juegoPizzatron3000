@@ -426,4 +426,4 @@ function hideInstructions() {
   if (isPaused) togglePause();              // reanuda si estaba pausado por instrucciones
 }
 
-startGame();
+//startGame();
