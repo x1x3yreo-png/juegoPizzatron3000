@@ -231,6 +231,12 @@ resumeBtn.addEventListener("click", togglePause);
 
 // Exportar a Google Sheets
 document.getElementById('export-stats-btn').addEventListener('click', () => {
+  const btn=this;
+
+  btn.disabled = true;
+  btn.textContent = "Enviando...";
+  btn.style.background = "#888";
+
   const name = playerNameInput.value.trim() || "Anónimo";
   const age  = playerAgeInput.value.trim() || "-";
 
