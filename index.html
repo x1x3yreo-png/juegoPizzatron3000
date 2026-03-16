@@ -66,12 +66,44 @@
                 <button onclick="location.reload()" style="margin: 15px; padding: 12px 30px; font-size: 1.3rem;">JUGAR DE NUEVO</button>
             </div>
             <div id="pause-overlay">
-            <div class="pause-content">
-                <h1>PAUSA</h1>
-                <button id="resume-btn">Continuar</button>
+                <div class="pause-content">
+                    <h1>PAUSA</h1>
+                    <button id="resume-btn">Continuar</button>
+                </div>
             </div>
+            <!-- Pantalla de bienvenida / instrucciones -->
+            <div id="welcome-overlay">
+                <div class="welcome-content">
+                    <h1>¡Bienvenido a Pizzatrón 3000!</h1>
+                    
+                    <p style="font-size: 1.3rem; margin: 20px 0;">
+                    <strong>Objetivo:</strong> ¡Prepara las pizzas perfectas antes de que se vayan por la cinta!<br><br>
+                    
+                    <strong>Cómo jugar:</strong><br>
+                    • Toca / haz clic en los ingredientes de abajo para agregarlos a la pizza.<br>
+                    • La pizza debe tener <strong>exactamente</strong> los ingredientes que pide la orden.<br>
+                    • Tienes 3 vidas. Si la pizza sale sin coincidir → pierdes una vida.<br>
+                    • Cada 5 pizzas correctas subes de nivel (la cinta va más rápido).<br>
+                    • Pausa con el botón <strong>Pausa</strong> o tecla <strong>ESC</strong>.<br>
+                    • Abre estas instrucciones con <strong>H</strong> o el botón “Cómo jugar”.<br><br>
+                    
+                    ¡Diviértete y rompe tu récord! 🍕🔥
+                    </p>
+
+                    <button id="start-game-btn" style="padding: 18px 60px; font-size: 1.8rem; background: #4caf50; color: white; border: none; border-radius: 12px; cursor: pointer; margin: 20px;">
+                    ¡JUGAR!
+                    </button>
+
+                    <p style="font-size: 1rem; margin-top: 20px; opacity: 0.8;">
+                    Hecho con ❤️ por Issac
+                    </p>
+                </div>
             </div>
 
+            <!-- Botón "Cómo jugar" visible durante el juego -->
+            <button id="how-to-play-btn" style="position: absolute; top: 70px; left: 50%; transform: translateX(-50%); padding: 8px 20px; font-size: 1.1rem; background: #0a9396; color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 50;">
+            Cómo jugar
+            </button>
             <button id="pause-btn">Pausa</button>
         </div>
         <script src="./javascript/script.js"></script>
