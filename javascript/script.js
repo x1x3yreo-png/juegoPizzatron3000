@@ -17,7 +17,7 @@ let ingredientesUsados  = 0;
 let startTime           = Date.now();
 let reactionStart       = Date.now();
 let reactionTimes       = [];
-
+let isReady = false;
 // ─── Info del dispositivo (se captura una vez) ─────────────────────────────
 const ua = navigator.userAgent || navigator.vendor || window.opera;
 const dispositivo = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
@@ -327,8 +327,28 @@ function startGame() {
   pauseOverlay.style.display = "none";
   pauseBtn.textContent = "Pausa";
 
-  gameLoop();
+  document.getElementById("ready-btn").style.display = "block";
 }
+const readyBtn = document.getElementById("ready-btn");
+
+// Al presionar "¡Listo!" o Espacio
+function startGameplay() {
+  if (!isReady) {
+    isReady = true;
+    isPaused = false;
+    readyBtn.style.display = "none";
+    gameLoop();  // ahora sí empieza el movimiento
+  }
+}
+
+readyBtn.addEventListener("click", startGameplay);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === ' ' || event.key === 'Spacebar' || event.keyCode === 32) {
+    event.preventDefault();
+    startGameplay();
+  }
+});
 document.addEventListener('keydown', (event) => {
   // Si se presiona ESC (keyCode 27 o event.key === 'Escape')
   if (event.key === 'Escape' || event.keyCode === 27) {
