@@ -205,13 +205,16 @@ document.querySelectorAll(".ing-button").forEach(btn => {
 
 // Pausa / Reanudar
 function togglePause() {
+  console.log("togglePause llamado"); // ← para ver si llega aquí
+
   if (!isReady) {
-    console.log("El juego aún no ha comenzado. Presiona ¡LISTO! o Espacio primero.");
-    // Opcional: mostrar un mensaje temporal en pantalla
-    // alert("¡Presiona 'LISTO!' o Espacio para comenzar!");
+    console.log("No se puede pausar aún: espera a '¡LISTO!'");
     return;
   }
+
   isPaused = !isPaused;
+  console.log("isPaused ahora es:", isPaused);
+
   if (isPaused) {
     pauseOverlay.style.display = "flex";
     pauseBtn.textContent = "Continuar";
