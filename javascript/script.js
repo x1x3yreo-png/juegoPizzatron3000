@@ -264,5 +264,31 @@ function startGame() {
   gameLoop();
 }
 
+// Pausa con tecla ESC
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' || event.keyCode === 27) {
+    event.preventDefault();
+    togglePause();
+  }
+});
+
+// (Tu función togglePause ya existente, con el opcional si quieres)
+function togglePause() {
+  isPaused = !isPaused;
+
+  if (isPaused) {
+    pauseOverlay.style.display = "flex";
+    pauseBtn.textContent = "Continuar";
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+  } else {
+    pauseOverlay.style.display = "none";
+    pauseBtn.textContent = "Pausa";
+    gameLoop();
+  }
+}
+
 // Iniciar
 startGame();
