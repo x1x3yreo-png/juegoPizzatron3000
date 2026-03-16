@@ -361,13 +361,6 @@ document.addEventListener('keydown', (event) => {
     startGameplay();
   }
 });
-document.addEventListener('keydown', (event) => {
-  // Si se presiona ESC (keyCode 27 o event.key === 'Escape')
-  if (event.key === 'Escape' || event.keyCode === 27) {
-    event.preventDefault(); // Evita que haga scroll o cierre algo en el navegador
-    togglePause(); // Llama a la función que ya tienes
-  }
-});
 // Iniciar
 //startGame();
 
