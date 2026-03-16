@@ -10,6 +10,33 @@ const INGREDIENTS = {
 
 const POSSIBLE_TOPPINGS = ["salsa", "queso", "pepperoni", "salchicha", "champi", "pepino"];
 
+// ─── Nuevas variables para análisis ────────────────────────────────────────
+let pizzasIntentadas    = 0;
+let errores             = 0;
+let ingredientesUsados  = 0;
+let startTime           = Date.now();
+let reactionStart       = Date.now();
+let reactionTimes       = [];
+
+// ─── Info del dispositivo (se captura una vez) ─────────────────────────────
+const ua = navigator.userAgent || navigator.vendor || window.opera;
+const dispositivo = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
+  ? (/iPad|tablet/i.test(ua) ? "tablet" : "móvil")
+  : "escritorio";
+
+const navegador = (() => {
+  if (/firefox/i.test(ua)) return "Firefox";
+  if (/chrome|crios/i.test(ua)) return "Chrome";
+  if (/safari/i.test(ua) && !/chrome/i.test(ua)) return "Safari";
+  if (/edg/i.test(ua)) return "Edge";
+  if (/opr\//i.test(ua)) return "Opera";
+  return "Otro";
+})();
+
+const resolucion = `${window.screen.width} × ${window.screen.height}`;
+const ventana    = `${window.innerWidth} × ${window.innerHeight}`;
+// ────────────────────────────────────────────────────────────────────────────
+
 let level = 1;
 let pizzasCorrectas = 0;
 let lives = 3;
@@ -31,7 +58,7 @@ let gameStats = JSON.parse(localStorage.getItem('pizzatronStats')) || {
   historial: []
 };
 
-// Datos del jugador (nombre y edad)
+// Datos del jugador
 let playerInfo = JSON.parse(localStorage.getItem('pizzatronPlayerInfo')) || {
   name: "",
   age: ""
@@ -51,8 +78,8 @@ const finalPizzas  = document.getElementById("final-pizzas");
 const pauseOverlay = document.getElementById("pause-overlay");
 const pauseBtn     = document.getElementById("pause-btn");
 const resumeBtn    = document.getElementById("resume-btn");
-const playerNameInput   = document.getElementById("player-name");
-const playerAgeInput    = document.getElementById("player-age");
+const playerNameInput = document.getElementById("player-name");
+const playerAgeInput  = document.getElementById("player-age");
 
 // Generar orden
 function generateOrder() {
@@ -67,6 +94,7 @@ function generateOrder() {
 function showNewOrder() {
   currentOrder = generateOrder();
   orderSpan.textContent = currentOrder.map(t => INGREDIENTS[t].letter).join(" + ");
+  reactionStart = Date.now();           // ← importante: inicia temporizador de reacción
 }
 
 function resetPizza() {
@@ -85,6 +113,8 @@ function updateHighScore() {
 }
 
 function checkPizza() {
+  pizzasIntentadas++;                     // ← cada pizza que llega al final cuenta como intentada
+
   const player = currentPizza.toppings.slice().sort();
   const needed = currentOrder.slice().sort();
 
@@ -100,6 +130,7 @@ function checkPizza() {
     resetPizza();
     showNewOrder();
   } else {
+    errores++;                            // ← error = pizza incorrecta
     lives--;
     heartsEl.textContent = "♥".repeat(lives);
     if (lives <= 0) {
@@ -107,11 +138,10 @@ function checkPizza() {
       finalLevel.textContent = level;
       finalPizzas.textContent = pizzasCorrectas;
 
-      // Precargar nombre y edad si ya existen
       playerNameInput.value = playerInfo.name;
       playerAgeInput.value = playerInfo.age;
 
-      // Guardar estadísticas de partida
+      // Guardar estadísticas acumuladas
       gameStats.partidasJugadas += 1;
       gameStats.historial.push({
         fecha: new Date().toLocaleString('es-EC'),
@@ -131,11 +161,17 @@ function checkPizza() {
 document.querySelectorAll(".ing-button").forEach(btn => {
   btn.addEventListener("click", () => {
     if (!currentPizza || isPaused) return;
-
     if (currentPizza.x < -50 || currentPizza.x > 880) return;
 
     const type = btn.dataset.ing;
     currentPizza.toppings.push(type);
+    ingredientesUsados++;                   // ← cada clic cuenta
+
+    // Medir tiempo de reacción solo en el PRIMER ingrediente
+    if (currentPizza.toppings.length === 1) {
+      const reaction = Date.now() - reactionStart;
+      reactionTimes.push(reaction);
+    }
 
     const ing = document.createElement("div");
     ing.className = "ingredient placed";
@@ -184,48 +220,70 @@ function togglePause() {
 pauseBtn.addEventListener("click", togglePause);
 resumeBtn.addEventListener("click", togglePause);
 
-// Exportar a Google Sheets (solo cuando se presiona el botón en Game Over)
+// Exportar a Google Sheets
 document.getElementById('export-stats-btn').addEventListener('click', () => {
   const name = playerNameInput.value.trim() || "Anónimo";
   const age  = playerAgeInput.value.trim() || "-";
 
-  // Guardar en local para próximas partidas
   playerInfo.name = name;
   playerInfo.age  = age;
   localStorage.setItem('pizzatronPlayerInfo', JSON.stringify(playerInfo));
 
-  // Datos a enviar
+  // Cálculos finales
+  const duracionPartida = Math.round((Date.now() - startTime) / 1000);
+
+  const precision = pizzasIntentadas > 0
+    ? (pizzasCorrectas / pizzasIntentadas).toFixed(3)
+    : "0.000";
+
+  const reactionAvg = reactionTimes.length > 0
+    ? Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length)
+    : 0;
+
+  // Datos completos
   const datos = {
-    nombre: name,
-    edad: age,
-    fecha: new Date().toLocaleString('es-EC'),
-    pizzas: pizzasCorrectas,
-    nivel: level,
-    totalPizzas: gameStats.totalPizzasCorrectas,
-    partidas: gameStats.partidasJugadas,
-    maxNivel: gameStats.maxLevel
+    nombre:               name,
+    edad:                 age,
+    fecha:                new Date().toLocaleString('es-EC'),
+    dispositivo:          dispositivo,
+    navegador:            navegador,
+    resolucion_pantalla:  resolucion,
+    ventana_visible:      ventana,
+
+    pizzas_correctas:     pizzasCorrectas,
+    pizzas_intentadas:    pizzasIntentadas,
+    errores:              errores,
+    precision:            precision,
+
+    nivel_alcanzado:      level,
+    velocidad_final:      Math.round(currentSpeed),
+
+    ingredientes_usados:  ingredientesUsados,
+    reaccion_promedio_ms: reactionAvg,
+    duracion_segundos:    duracionPartida,
+
+    total_pizzas_historico: gameStats.totalPizzasCorrectas,
+    partidas_jugadas:     gameStats.partidasJugadas,
+    nivel_maximo_historico: gameStats.maxLevel
   };
 
-  // Convertir a form-urlencoded (más estable con Apps Script)
   const formData = new URLSearchParams();
   for (const [key, value] of Object.entries(datos)) {
     formData.append(key, value);
   }
 
-  fetch('https://script.google.com/macros/s/AKfycbyWDn11xeKTVblSPNp3kZPfEtOqcvmppHUIWhZlolByzkCAeo_uvK49VHh9HkE2WCIs6A/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbw_b1HxUdNFt-2KGJDbPg1oZRZqdFIyVIs0R3RsSRtqVj8Pf2kfBUBuRmD9Vr2zLDfbjw/exec', {
     method: 'POST',
     mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: formData
   })
   .then(() => {
-    alert("¡Resultados enviados correctamente! Gracias por jugar, " + name + " 🎉");
+    alert("¡Datos enviados! Gracias por jugar, " + name + " 🍕");
   })
   .catch(err => {
     console.error("Error al enviar:", err);
-    alert("No se pudo enviar los datos. Revisa tu conexión o la URL del script.");
+    alert("No se pudo enviar. Revisa conexión o URL del script.");
   });
 });
 
@@ -245,6 +303,14 @@ function gameLoop() {
 
 // Inicio del juego
 function startGame() {
+  // Reiniciar métricas de análisis
+  pizzasIntentadas   = 0;
+  errores            = 0;
+  ingredientesUsados = 0;
+  startTime          = Date.now();
+  reactionTimes      = [];
+  reactionStart      = Date.now();
+
   lives = 3;
   level = 1;
   pizzasCorrectas = 0;
@@ -264,35 +330,5 @@ function startGame() {
   gameLoop();
 }
 
-// Pausa con tecla ESC
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' || event.keyCode === 27) {
-    event.preventDefault();
-    togglePause();
-  }
-});
-
-// (Tu función togglePause ya existente, con el opcional si quieres)
-function togglePause() {
-  isPaused = !isPaused;
-
-  if (isPaused) {
-    pauseOverlay.style.display = "flex";
-    pauseBtn.textContent = "Continuar";
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
-      animationFrameId = null;
-    }
-  } else {
-    pauseOverlay.style.display = "none";
-    pauseBtn.textContent = "Pausa";
-    gameLoop();
-  }
-}
-document.addEventListener('touchstart', function(event) {
-  if (event.touches.length > 1) {
-    event.preventDefault();
-  }
-}, { passive: false });
 // Iniciar
 startGame();
