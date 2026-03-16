@@ -249,3 +249,104 @@ body {
 #resume-btn:hover {
   background: #66bb6a;
 }
+
+
+@media (max-width: 920px) {
+  #game {
+    width: 100vw;               /* ocupa todo el ancho del celular */
+    height: 100vh;              /* ocupa toda la pantalla */
+    border-radius: 0;           /* sin bordes redondos en móvil */
+    border: none;               /* quita borde grueso para ganar espacio */
+    box-shadow: none;           /* quita sombra para rendimiento */
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #conveyor {
+    top: 20%;                   /* ajusta posición */
+    height: 25vh;               /* más alto relativo */
+  }
+
+  #pizza {
+    width: 18vw;                /* tamaño relativo al ancho */
+    height: 18vw;
+    top: 25%;                   /* centro aproximado */
+    left: -20vw;                /* inicia fuera de pantalla */
+  }
+
+  .ingredient {
+    width: 6vw;
+    height: 6vw;
+  }
+
+  #order-board {
+    width: 70vw;
+    height: 12vh;
+    top: 2vh;
+    left: 2vw;
+    font-size: 4vw;             /* texto más grande en móvil */
+    padding: 2vw;
+  }
+
+  #stats {
+    top: 2vh;
+    right: 2vw;
+    font-size: 3.5vw;
+    text-align: right;
+  }
+
+  #ingredients-bar {
+    bottom: 0;
+    height: 18vh;
+    gap: 2vw;
+    padding: 1vh 2vw;
+  }
+
+  .ing-button {
+    width: 14vw;
+    height: 16vh;
+    border-radius: 10px;
+  }
+
+  .ing-button span {
+    font-size: 2.5vw;
+    padding: 1vh 0;
+  }
+
+  #pause-btn {
+    top: 1vh;
+    padding: 1.5vh 4vw;
+    font-size: 3.5vw;
+  }
+
+  #pause-overlay .pause-content h1 {
+    font-size: 15vw;
+  }
+
+  #pause-overlay #resume-btn {
+    padding: 2vh 8vw;
+    font-size: 5vw;
+  }
+
+  #game-over {
+    font-size: 12vw;
+  }
+
+  #game-over .final-text {
+    font-size: 5vw;
+  }
+
+  #game-over button {
+    padding: 2vh 6vw;
+    font-size: 4.5vw;
+  }
+}
+
+/* Mejora toque en móvil */
+.ing-button {
+  touch-action: manipulation;   /* evita zoom al doble tap */
+}
