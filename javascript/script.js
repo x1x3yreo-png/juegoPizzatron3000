@@ -359,6 +359,7 @@ document.addEventListener('keydown', (event) => {
   if (event.key === ' ' || event.key === 'Spacebar' || event.keyCode === 32) {
     event.preventDefault();
     startGameplay();
+    return;
   }
 });
 // Iniciar
@@ -390,11 +391,13 @@ document.addEventListener('keydown', (event) => {
   if (event.key.toLowerCase() === 'h') {
     event.preventDefault();
     showInstructions();
+    return;
   }
   // ESC siempre pausa/reanuda (ya lo tienes)
   if (event.key === 'Escape' || event.keyCode === 27) {
     event.preventDefault();
     togglePause();
+    return;
   }
 });
 
