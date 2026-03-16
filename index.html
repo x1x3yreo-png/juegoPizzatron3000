@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pizzatrón 3000</title>
+  <link rel="icon" type="image/x-icon" href="https://yt3.ggpht.com/yti/ANjgQV-TbMBT-NI-A6CFI1YOlNHz2Vl4WK170n8cFYwg7izNAA=s108-c-k-c0x00ffffff-no-rj">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+    <body>
+        <div id="game">
+            <div id="conveyor"></div>
+            <div id="pizza"></div>
+
+            <div id="order-board">
+                Orden:  <span id="current-order">—</span>
+            </div>
+            <div id="stats">
+                Nivel: <span id="level">1</span><br>
+                Pizzas: <span id="score">0</span> / 5<br>
+                <div id="lives">
+                    Vidas: <span id="hearts">♥♥♥</span>
+                </div>
+                Récord: Nivel <span id="high-level">—</span>
+            </div>
+            <div id="ingredients-bar">
+                <div class="ing-button" data-ing="salsa"     title="Salsa">
+                    <span class="ing-label">Salsa</span>
+                </div>
+                <div class="ing-button" data-ing="queso"     title="Queso">
+                    <span class="ing-label">Queso</span>
+                </div>
+                <div class="ing-button" data-ing="pepperoni" title="Pepperoni">
+                    <span class="ing-label">Pepperoni</span>
+                </div>
+                <div class="ing-button" data-ing="salchicha" title="Salchicha">
+                    <span class="ing-label">Salchicha</span>
+                </div>
+                <div class="ing-button" data-ing="champi"    title="Champiñón">
+                    <span class="ing-label">Champiñón</span>
+                </div>
+                <div class="ing-button" data-ing="pepino"    title="Pepino">
+                    <span class="ing-label">Pepino</span>
+                </div>
+            </div>
+            <div id="game-over">
+                <div>GAME OVER</div>
+                <div class="final-text">
+                    Nivel alcanzado: <span id="final-level">—</span><br>
+                    Pizzas correctas: <span id="final-pizzas">0</span>
+                </div>
+
+                <!-- Nuevo formulario simple -->
+                <div style="margin: 25px 0; text-align: center; color: white; font-size: 1.2rem;">
+                    <label for="player-name">Tu nombre:</label><br>
+                    <input type="text" id="player-name" placeholder="Ej: Issac" style="padding: 8px; margin: 8px; width: 200px; border-radius: 6px; border: 1px solid #ccc;"><br>
+
+                    <label for="player-age">Tu edad:</label><br>
+                    <input type="number" id="player-age" placeholder="Ej: 15" min="5" max="100" style="padding: 8px; margin: 8px; width: 200px; border-radius: 6px; border: 1px solid #ccc;"><br>
+                </div>
+                <button id="export-stats-btn" style="margin: 15px; padding: 12px 30px; font-size: 1.3rem; background: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Exportar mis resultados (CSV)
+                </button>
+                <button onclick="location.reload()" style="margin: 15px; padding: 12px 30px; font-size: 1.3rem;">JUGAR DE NUEVO</button>
+            </div>
+            <div id="pause-overlay">
+            <div class="pause-content">
+                <h1>PAUSA</h1>
+                <button id="resume-btn">Continuar</button>
+            </div>
+            </div>
+
+            <button id="pause-btn">Pausa</button>
+        </div>
+        <script src="./javascript/script.js"></script>
+    </body>
+</html>

@@ -1,0 +1,250 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0d1b2a;
+  color: #e0e0e0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#game {
+  position: relative;
+  width: 920px;
+  height: 620px;
+  background: #1b263b;
+  border: 8px solid #415a77;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0,0,0,0.7);
+}
+
+#conveyor {
+  position: absolute;
+  top: 180px;
+  left: 0;
+  width: 100%;
+  height: 160px;
+  background: linear-gradient(to right, #4a4e69, #5c6377);
+  border-top: 6px solid #778da9;
+  border-bottom: 6px solid #778da9;
+}
+
+#pizza {
+  position: absolute;
+  left: -140px;
+  top: 190px;
+  width: 120px;
+  height: 120px;
+  background: #f4a261 url('https://i.imgur.com/8ZxK9Lm.png') center/cover;
+  border-radius: 50%;
+  border: 5px solid #e67e22;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 0 20px #f4a261;
+  transition: transform 0.1s, box-shadow 0.4s;
+  user-select: none;
+}
+
+.ingredient {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.25s ease-out;
+}
+
+.ingredient.placed {
+  animation: bounceIn 0.4s ease-out;
+}
+
+@keyframes bounceIn {
+  0%   { transform: translate(-50%, -50%) scale(0.4); }
+  60%  { transform: translate(-50%, -50%) scale(1.25); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+#order-board {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  width: 360px;
+  height: 120px;
+  background: #0a9396;
+  border: 6px solid #ee9b00;
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 1.5rem;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 4px black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
+}
+
+#stats {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-size: 1.35rem;
+  text-align: right;
+}
+
+#ingredients-bar {
+  position: absolute;
+  bottom: 25px;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  background: #343a40;
+  border-top: 5px solid #495057;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+}
+
+.ing-button {
+  width: 90px;
+  height: 110px;
+  border-radius: 12px;
+  background-color: white;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.ing-button:active {
+  transform: scale(0.92);
+}
+
+.ing-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #ee9b00;
+}
+
+.ing-button span {
+  width: 100%;
+  text-align: center;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Imágenes de ingredientes */
+.ing-button[data-ing="salsa"]     { background-image: url('../imagenes/salsa.jpg'); }
+.ing-button[data-ing="queso"]     { background-image: url('../imagenes/queso.jpg'); }
+.ing-button[data-ing="pepperoni"] { background-image: url('../imagenes/pepperoni.jpg'); }
+.ing-button[data-ing="salchicha"] { background-image: url('../imagenes/salchicha.jpg'); }
+.ing-button[data-ing="champi"]    { background-image: url('../imagenes/champiñones.jpg'); }
+.ing-button[data-ing="pepino"]    { background-image: url('../imagenes/pepino.jpg'); }
+
+#game-over {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ff4d6d;
+  font-size: 5rem;
+  font-weight: bold;
+  text-shadow: 5px 5px 15px black;
+  z-index: 100;
+}
+
+#game-over .final-text {
+  font-size: 2.4rem;
+  margin: 25px 0;
+  color: #ffd60a;
+}
+
+#game-over button {
+  margin-top: 40px;
+  padding: 18px 50px;
+  font-size: 2rem;
+  background: #ff4d6d;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  cursor: pointer;
+}
+
+#pause-btn {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 25px;
+  font-size: 1.2rem;
+  background: #ee9b00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+#pause-btn:hover {
+  background: #ffaa00;
+}
+
+#pause-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 60;
+  color: white;
+}
+
+.pause-content {
+  text-align: center;
+}
+
+.pause-content h1 {
+  font-size: 5rem;
+  margin-bottom: 30px;
+  text-shadow: 3px 3px 10px black;
+}
+
+#resume-btn {
+  padding: 15px 50px;
+  font-size: 1.8rem;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#resume-btn:hover {
+  background: #66bb6a;
+}
