@@ -10,15 +10,17 @@ const INGREDIENTS = {
 
 const POSSIBLE_TOPPINGS = ["salsa", "queso", "pepperoni", "salchicha", "champi", "pepino"];
 
-// ─── Nuevas variables para análisis ────────────────────────────────────────
+// Variables para análisis
 let pizzasIntentadas    = 0;
 let errores             = 0;
 let ingredientesUsados  = 0;
 let startTime           = Date.now();
 let reactionStart       = Date.now();
 let reactionTimes       = [];
-let isReady = false;
-// ─── Info del dispositivo (se captura una vez) ─────────────────────────────
+let isReady             = false;
+let yaEnviadoEstaPartida = false; // evita envíos duplicados
+
+// Info del dispositivo (se captura una vez)
 const ua = navigator.userAgent || navigator.vendor || window.opera;
 const dispositivo = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
   ? (/iPad|tablet/i.test(ua) ? "tablet" : "móvil")
@@ -35,8 +37,8 @@ const navegador = (() => {
 
 const resolucion = `${window.screen.width} × ${window.screen.height}`;
 const ventana    = `${window.innerWidth} × ${window.innerHeight}`;
-// ────────────────────────────────────────────────────────────────────────────
 
+// Variables del juego
 let level = 1;
 let pizzasCorrectas = 0;
 let lives = 3;
@@ -94,7 +96,7 @@ function generateOrder() {
 function showNewOrder() {
   currentOrder = generateOrder();
   orderSpan.textContent = currentOrder.map(t => INGREDIENTS[t].letter).join(" + ");
-  reactionStart = Date.now();           // ← importante: inicia temporizador de reacción
+  reactionStart = Date.now();
 }
 
 function resetPizza() {
@@ -113,7 +115,7 @@ function updateHighScore() {
 }
 
 function checkPizza() {
-  pizzasIntentadas++;                     // ← cada pizza que llega al final cuenta como intentada
+  pizzasIntentadas++;
 
   const player = currentPizza.toppings.slice().sort();
   const needed = currentOrder.slice().sort();
@@ -130,7 +132,7 @@ function checkPizza() {
     resetPizza();
     showNewOrder();
   } else {
-    errores++;                            // ← error = pizza incorrecta
+    errores++;
     lives--;
     heartsEl.textContent = "♥".repeat(lives);
     if (lives <= 0) {
@@ -141,7 +143,6 @@ function checkPizza() {
       playerNameInput.value = playerInfo.name;
       playerAgeInput.value = playerInfo.age;
 
-      // Guardar estadísticas acumuladas
       gameStats.partidasJugadas += 1;
       gameStats.historial.push({
         fecha: new Date().toLocaleString('es-EC'),
@@ -158,17 +159,15 @@ function checkPizza() {
 }
 
 // Agregar ingredientes con clic
-
 document.querySelectorAll(".ing-button").forEach(btn => {
   btn.addEventListener("click", () => {
-    if (!currentPizza || isPaused) return;
+    if (!currentPizza || isPaused || !isReady) return;
     if (currentPizza.x < -50 || currentPizza.x > 880) return;
 
     const type = btn.dataset.ing;
     currentPizza.toppings.push(type);
-    ingredientesUsados++;                   // ← cada clic cuenta
+    ingredientesUsados++;
 
-    // Medir tiempo de reacción solo en el PRIMER ingrediente
     if (currentPizza.toppings.length === 1) {
       const reaction = Date.now() - reactionStart;
       reactionTimes.push(reaction);
@@ -205,22 +204,37 @@ document.querySelectorAll(".ing-button").forEach(btn => {
 });
 
 // Pausa / Reanudar
-// Bandera para evitar envíos duplicados en la misma partida
-let yaEnviadoEstaPartida = false;
+function togglePause() {
+  if (!isReady) {
+    console.log("El juego aún no ha comenzado. Presiona ¡LISTO! o Espacio primero.");
+    return;
+  }
 
+  isPaused = !isPaused;
+
+  if (isPaused) {
+    pauseOverlay.style.display = "flex";
+    pauseBtn.textContent = "Continuar";
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  } else {
+    pauseOverlay.style.display = "none";
+    pauseBtn.textContent = "Pausa";
+    gameLoop();
+  }
+}
+
+pauseBtn.addEventListener("click", togglePause);
+resumeBtn.addEventListener("click", togglePause);
+
+// Exportar a Google Sheets
 document.getElementById('export-stats-btn').addEventListener('click', function() {
   const btn = this;
 
-  // Protección 1: ya enviado en esta partida
-  if (yaEnviadoEstaPartida) {
+  if (yaEnviadoEstaPartida || btn.disabled) {
     alert("¡Ya enviaste los resultados de esta partida! 🍕");
     return;
   }
 
-  // Protección 2: evita clics múltiples rápidos
-  if (btn.disabled) return;
-
-  // Deshabilitar inmediatamente
   btn.disabled = true;
   btn.textContent = "Enviando...";
   btn.style.background = "#888";
@@ -229,12 +243,10 @@ document.getElementById('export-stats-btn').addEventListener('click', function()
   const name = playerNameInput.value.trim() || "Anónimo";
   const age  = playerAgeInput.value.trim() || "-";
 
-  // Guardar en localStorage (esto ya debería funcionar)
   playerInfo.name = name;
   playerInfo.age  = age;
   localStorage.setItem('pizzatronPlayerInfo', JSON.stringify(playerInfo));
 
-  // Tus cálculos (están perfectos)
   const duracionPartida = Math.round((Date.now() - startTime) / 1000);
 
   const precision = pizzasIntentadas > 0
@@ -285,76 +297,130 @@ document.getElementById('export-stats-btn').addEventListener('click', function()
   .then(() => {
     alert("¡Datos enviados! Gracias por jugar, " + name + " 🍕");
     btn.textContent = "Enviado ✓";
-    btn.style.background = "#66bb6a";  // verde éxito
-    yaEnviadoEstaPartida = true;       // bloquea permanentemente en esta partida
+    btn.style.background = "#66bb6a";
+    yaEnviadoEstaPartida = true;
   })
   .catch(err => {
     console.error("Error al enviar:", err);
     alert("No se pudo enviar. Intenta de nuevo.");
     btn.disabled = false;
     btn.textContent = "Reintentar envío";
-    btn.style.background = "#ff4d6d";  // rojo error
-    // NO reseteamos yaEnviadoEstaPartida aquí → si falla, permite reintentar
+    btn.style.background = "#ff4d6d";
   });
 });
-// Iniciar
-//startGame();
+
+// Bucle de juego
+function gameLoop() {
+  if (!currentPizza || isPaused) return;
+
+  currentPizza.x += currentSpeed / 60;
+  pizzaEl.style.left = currentPizza.x + "px";
+
+  if (currentPizza.x > 920 + 140) {
+    checkPizza();
+  }
+
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+// Inicio del juego (pausado)
+function startGame() {
+  pizzasIntentadas   = 0;
+  errores            = 0;
+  ingredientesUsados = 0;
+  startTime          = Date.now();
+  reactionTimes      = [];
+  reactionStart      = Date.now();
+
+  lives = 3;
+  level = 1;
+  pizzasCorrectas = 0;
+  currentSpeed = baseSpeed;
+  isPaused = true;
+  isReady = false;
+
+  heartsEl.textContent = "♥♥♥";
+  levelEl.textContent = "1";
+  scoreEl.textContent = "0";
+
+  resetPizza();
+  showNewOrder();
+
+  gameOver.style.display = "none";
+  pauseOverlay.style.display = "none";
+  pauseBtn.textContent = "Pausa";
+
+  document.getElementById("ready-btn").style.display = "block";
+}
+
+// ¡LISTO! inicia el juego
+const readyBtn = document.getElementById("ready-btn");
+
+function startGameplay() {
+  if (!isReady) {
+    isReady = true;
+    isPaused = false;
+    readyBtn.style.display = "none";
+    gameLoop();
+  }
+}
+
+readyBtn.addEventListener("click", startGameplay);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === ' ' || event.keyCode === 32) {
+    event.preventDefault();
+    startGameplay();
+  }
+});
 
 // Pantalla de bienvenida e instrucciones
-// Pantalla de instrucciones (no reinicia el juego)
 const welcomeOverlay = document.getElementById("welcome-overlay");
 const startGameBtn = document.getElementById("start-game-btn");
 const howToPlayBtn = document.getElementById("how-to-play-btn");
 const closeInstructionsBtn = document.getElementById("close-instructions");
 
-// Al inicio: mostrar instrucciones y esperar a "Jugar"
 welcomeOverlay.style.display = "flex";
-howToPlayBtn.style.display = "none"; // oculto hasta que empiece el juego
+howToPlayBtn.style.display = "none";
 
-// Botón "¡JUGAR!" solo inicia la primera vez
 startGameBtn.addEventListener("click", () => {
   welcomeOverlay.style.display = "none";
-  howToPlayBtn.style.display = "block"; // ahora visible
-  if (!currentPizza) {  // solo inicia si aún no empezó
+  howToPlayBtn.style.display = "block";
+  if (!currentPizza) {
     startGame();
   }
 });
 
-// Botón "Cómo jugar" y tecla H durante el juego
 howToPlayBtn.addEventListener("click", showInstructions);
+
 document.addEventListener('keydown', (event) => {
   if (event.key.toLowerCase() === 'h') {
     event.preventDefault();
     showInstructions();
-    return;
   }
-  // ESC siempre pausa/reanuda (ya lo tienes)
   if (event.key === 'Escape' || event.keyCode === 27) {
     event.preventDefault();
     togglePause();
-    return;
   }
 });
 
-// Botón de cerrar instrucciones
 if (closeInstructionsBtn) {
   closeInstructionsBtn.addEventListener("click", hideInstructions);
 }
 
-// Función para mostrar instrucciones sin reiniciar
 function showInstructions() {
   welcomeOverlay.style.display = "flex";
-  startGameBtn.style.display = "none";      // oculta "Jugar" cuando ya empezó
-  closeInstructionsBtn.style.display = "block"; // muestra × para cerrar
-  if (!isPaused) togglePause();             // pausa si no está pausado
+  startGameBtn.style.display = "none";
+  if (closeInstructionsBtn) closeInstructionsBtn.style.display = "block";
+  if (!isPaused) togglePause();
 }
 
-// Función para ocultar instrucciones
 function hideInstructions() {
   welcomeOverlay.style.display = "none";
-  startGameBtn.style.display = "block";     // vuelve a mostrar por si acaso
-  closeInstructionsBtn.style.display = "none";
-  if (isPaused) togglePause();              // reanuda si estaba pausado por instrucciones
+  startGameBtn.style.display = "block";
+  if (closeInstructionsBtn) closeInstructionsBtn.style.display = "none";
+  if (isPaused) togglePause();
 }
 
-//startGame();
+// NO llamar startGame() aquí para que quede en bienvenida
+// startGame(); // ← COMENTADO o eliminado
