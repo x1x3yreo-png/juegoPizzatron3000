@@ -211,27 +211,30 @@ let yaEnviadoEstaPartida = false;
 document.getElementById('export-stats-btn').addEventListener('click', function() {
   const btn = this;
 
-  // 1. Protección contra clics múltiples o ya enviado
-  if (yaEnviadoEstaPartida || btn.disabled) {
+  // Protección 1: ya enviado en esta partida
+  if (yaEnviadoEstaPartida) {
     alert("¡Ya enviaste los resultados de esta partida! 🍕");
     return;
   }
 
-  // 2. Deshabilitar inmediatamente
+  // Protección 2: evita clics múltiples rápidos
+  if (btn.disabled) return;
+
+  // Deshabilitar inmediatamente
   btn.disabled = true;
   btn.textContent = "Enviando...";
   btn.style.background = "#888";
   btn.style.cursor = "not-allowed";
 
-  // 3. Obtener nombre y edad
   const name = playerNameInput.value.trim() || "Anónimo";
   const age  = playerAgeInput.value.trim() || "-";
 
+  // Guardar en localStorage (esto ya debería funcionar)
   playerInfo.name = name;
   playerInfo.age  = age;
   localStorage.setItem('pizzatronPlayerInfo', JSON.stringify(playerInfo));
 
-  // 4. Tus cálculos (están perfectos)
+  // Tus cálculos (están perfectos)
   const duracionPartida = Math.round((Date.now() - startTime) / 1000);
 
   const precision = pizzasIntentadas > 0
@@ -268,14 +271,12 @@ document.getElementById('export-stats-btn').addEventListener('click', function()
     nivel_maximo_historico: gameStats.maxLevel
   };
 
-  // 5. Preparar formData
   const formData = new URLSearchParams();
   for (const [key, value] of Object.entries(datos)) {
     formData.append(key, value);
   }
 
-  // 6. Enviar
-  fetch('https://script.google.com/macros/s/AKfycbxMHxiyABuCRWLOPSz0JMvhfGxOhMhs1P0_M-oF79RbHdHeJkiIp6wA7WfVrUXi741XWQ/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbw_b1HxUdNFt-2KGJDbPg1oZRZqdFIyVIs0R3RsSRtqVj8Pf2kfBUBuRmD9Vr2zLDfbjw/exec', {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -285,7 +286,7 @@ document.getElementById('export-stats-btn').addEventListener('click', function()
     alert("¡Datos enviados! Gracias por jugar, " + name + " 🍕");
     btn.textContent = "Enviado ✓";
     btn.style.background = "#66bb6a";  // verde éxito
-    yaEnviadoEstaPartida = true;       // bloquea futuros envíos
+    yaEnviadoEstaPartida = true;       // bloquea permanentemente en esta partida
   })
   .catch(err => {
     console.error("Error al enviar:", err);
@@ -293,6 +294,7 @@ document.getElementById('export-stats-btn').addEventListener('click', function()
     btn.disabled = false;
     btn.textContent = "Reintentar envío";
     btn.style.background = "#ff4d6d";  // rojo error
+    // NO reseteamos yaEnviadoEstaPartida aquí → si falla, permite reintentar
   });
 });
 // Iniciar
