@@ -158,6 +158,7 @@ function checkPizza() {
 }
 
 // Agregar ingredientes con clic
+
 document.querySelectorAll(".ing-button").forEach(btn => {
   btn.addEventListener("click", () => {
     if (!currentPizza || isPaused) return;
@@ -274,7 +275,7 @@ document.getElementById('export-stats-btn').addEventListener('click', function()
   }
 
   // 6. Enviar
-  fetch('https://script.google.com/macros/s/AKfycbw_b1HxUdNFt-2KGJDbPg1oZRZqdFIyVIs0R3RsSRtqVj8Pf2kfBUBuRmD9Vr2zLDfbjw/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbxlrK8iIJMtUsEI8Pl8fle-uAJfn_7rawnGj4ax1cUNFmU2giQl_-pO0MvS_L15h5iixA/exec', {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
