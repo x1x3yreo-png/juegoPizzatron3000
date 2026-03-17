@@ -275,7 +275,7 @@ document.getElementById('export-stats-btn').addEventListener('click', function()
   }
 
   // 6. Enviar
-  fetch('https://script.google.com/macros/s/AKfycbxamIwBLnHES0QYRyXjBERVo_E4tOV3OCZ3eoFyYWrmw2DLzsJ6fbrfTeTphfpGMJ0l/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbwoQdfVV9ZLR0ouuSsedyptoqPWx5W-RAEEwBFnJpmPPIAmBcQqj5PmrCpEHluyPbrnbg/exec', {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
