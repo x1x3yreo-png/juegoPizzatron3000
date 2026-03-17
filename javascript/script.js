@@ -204,51 +204,25 @@ document.querySelectorAll(".ing-button").forEach(btn => {
 });
 
 // Pausa / Reanudar
-function togglePause() {
-  console.log("togglePause llamado"); // ← para ver si llega aquí
-
-  if (!isReady) {
-    console.log("No se puede pausar aún: espera a '¡LISTO!'");
-    return;
-  }
-
-  isPaused = !isPaused;
-  console.log("isPaused ahora es:", isPaused);
-
-  if (isPaused) {
-    pauseOverlay.style.display = "flex";
-    pauseBtn.textContent = "Continuar";
-    if (animationFrameId) cancelAnimationFrame(animationFrameId);
-  } else {
-    pauseOverlay.style.display = "none";
-    pauseBtn.textContent = "Pausa";
-    gameLoop();
-  }
-}
-
-pauseBtn.addEventListener("click", togglePause);
-resumeBtn.addEventListener("click", togglePause);
-
-// Exportar a Google Sheets
+// Bandera para evitar envíos duplicados en la misma partida
 let yaEnviadoEstaPartida = false;
-document.getElementById('export-stats-btn').addEventListener('click', () => {
+
+document.getElementById('export-stats-btn').addEventListener('click', function() {
   const btn = this;
 
-  // Protección 1: ya enviado en esta partida
-  if (yaEnviadoEstaPartida) {
+  // 1. Protección contra clics múltiples o ya enviado
+  if (yaEnviadoEstaPartida || btn.disabled) {
     alert("¡Ya enviaste los resultados de esta partida! 🍕");
     return;
   }
 
-  // Protección 2: evita clics múltiples rápidos
-  if (btn.disabled) return;
-
-  // Deshabilitar inmediatamente
+  // 2. Deshabilitar inmediatamente
   btn.disabled = true;
   btn.textContent = "Enviando...";
   btn.style.background = "#888";
   btn.style.cursor = "not-allowed";
 
+  // 3. Obtener nombre y edad
   const name = playerNameInput.value.trim() || "Anónimo";
   const age  = playerAgeInput.value.trim() || "-";
 
@@ -256,7 +230,7 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
   playerInfo.age  = age;
   localStorage.setItem('pizzatronPlayerInfo', JSON.stringify(playerInfo));
 
-  // Tus cálculos (perfectos)
+  // 4. Tus cálculos (están perfectos)
   const duracionPartida = Math.round((Date.now() - startTime) / 1000);
 
   const precision = pizzasIntentadas > 0
@@ -293,11 +267,13 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
     nivel_maximo_historico: gameStats.maxLevel
   };
 
+  // 5. Preparar formData
   const formData = new URLSearchParams();
   for (const [key, value] of Object.entries(datos)) {
     formData.append(key, value);
   }
 
+  // 6. Enviar
   fetch('https://script.google.com/macros/s/AKfycbw_b1HxUdNFt-2KGJDbPg1oZRZqdFIyVIs0R3RsSRtqVj8Pf2kfBUBuRmD9Vr2zLDfbjw/exec', {
     method: 'POST',
     mode: 'no-cors',
@@ -307,88 +283,16 @@ document.getElementById('export-stats-btn').addEventListener('click', () => {
   .then(() => {
     alert("¡Datos enviados! Gracias por jugar, " + name + " 🍕");
     btn.textContent = "Enviado ✓";
-    btn.style.background = "#66bb6a";
-    yaEnviadoEstaPartida = true;  // bloquea futuros envíos
+    btn.style.background = "#66bb6a";  // verde éxito
+    yaEnviadoEstaPartida = true;       // bloquea futuros envíos
   })
   .catch(err => {
     console.error("Error al enviar:", err);
     alert("No se pudo enviar. Intenta de nuevo.");
-    // Rehabilitar solo si falla
     btn.disabled = false;
     btn.textContent = "Reintentar envío";
-    btn.style.background = "#ff4d6d";
-    yaEnviadoEstaPartida = false;
+    btn.style.background = "#ff4d6d";  // rojo error
   });
-});
-
-// Bucle de juego
-function gameLoop() {
-  if (!currentPizza || isPaused) return;
-
-  currentPizza.x += currentSpeed / 60;
-  pizzaEl.style.left = currentPizza.x + "px";
-
-  if (currentPizza.x > 920 + 140) {
-    checkPizza();
-  }
-
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
-
-// Inicio del juego
-function startGame() {
-  // Reiniciar métricas de análisis
-  pizzasIntentadas   = 0;
-  errores            = 0;
-  ingredientesUsados = 0;
-  startTime          = Date.now();
-  reactionTimes      = [];
-  reactionStart      = Date.now();
-
-  lives = 3;
-  level = 1;
-  pizzasCorrectas = 0;
-  currentSpeed = baseSpeed;
-  isPaused = true;           // ¡Pausado desde el inicio!
-  isReady = false;
-
-  heartsEl.textContent = "♥♥♥";
-  levelEl.textContent = "1";
-  scoreEl.textContent = "0";
-
-  resetPizza();
-  showNewOrder();
-
-  gameOver.style.display = "none";
-  pauseOverlay.style.display = "none";
-  pauseBtn.textContent = "Pausa";
-
-  // Mostrar botón "¡LISTO!"
-  document.getElementById("ready-btn").style.display = "block";
-
-  // NO llamamos gameLoop() aquí
-}
-const readyBtn = document.getElementById("ready-btn");
-
-// Al presionar "¡Listo!" o Espacio
-function startGameplay() {
-  if (!isReady) {
-    isReady = true;
-    isPaused = false;
-    //readyBtn.style.display = "none";
-    document.getElementById("ready-btn").style.display = "none";
-    gameLoop();  // ahora sí empieza el movimiento
-  }
-}
-
-readyBtn.addEventListener("click", startGameplay);
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === ' ' || event.key === 'Spacebar' || event.keyCode === 32) {
-    event.preventDefault();
-    startGameplay();
-    return;
-  }
 });
 // Iniciar
 //startGame();
